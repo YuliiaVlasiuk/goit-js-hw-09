@@ -1,59 +1,62 @@
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 
+
 const input = document.querySelector('#datetime-picker');
 
-const start = document.querySelector('button[data-start]');
+const startButton = document.querySelector('button[data-start]');
+
+const dataDays = document.querySelector('span[data-days]');
+const dataHours = document.querySelector('span[data-hours]');
+const dataMinutes = document.querySelector('span[data-minutes]');
+const dataSeconds = document.querySelector('span[data-seconds]');
 
 
-const dataDays=document.querySelector('span[data-days]');
-const dataHours=document.querySelector('span[data-hours]');
-const dataMinutes=document.querySelector('span[data-minutes]');
-const dataSeconds=document.querySelector('span[data-seconds]');
 
-start.addEventListener('click', onClickStart)
 
-start.disabled = true;
+let deltaTime = 0;
+let setIntervalId = 0;
+
+startButton.disabled = true;
 
 const options = {
   enableTime: true,
   time_24hr: true,
   defaultDate: new Date(),
   minuteIncrement: 1,
+
   onClose(selectedDates) {
+    clearInterval(setIntervalId);
+
     const date1 = options.defaultDate.getTime();
-    console.log(date1);
+    // console.log(date1);
 
     const date2 = selectedDates[0].getTime();
 
-    const deltatime = date2 - date1;
-    console.log(date2);
-    console.log(deltatime);
-
-    const timeComponents = convertMs(deltatime);
-    console.log(timeComponents);
-
-    if (deltatime > 0) {
-      start.disabled = false;
-dataDays.textContent=String(timeComponents.days).padStart(2,'0');
-dataHours.textContent=String(timeComponents.hours).padStart(2,'0');
-dataMinutes.textContent=String(timeComponents.minutes).padStart(2,'0');
-dataSeconds.textContent=String(timeComponents.seconds).padStart(2,'0');
-
-
-
-
-       } else {
-    start.disabled = true;
+    deltaTime = date2 - date1;
+    // console.log(date2);
+    // console.log(deltaTime);
+    if (deltaTime > 0) {
+      startButton.disabled = false;
+      const timeComponents = convertMs(deltaTime);
+      // console.log(timeComponents);
+      
+      dataDays.textContent = timeComponents.days;
+      dataHours.textContent = String(timeComponents.hours).padStart(2, '0');
+      dataMinutes.textContent = String(timeComponents.minutes).padStart(2, '0');
+      dataSeconds.textContent = String(timeComponents.seconds).padStart(2, '0');
+    } else {
+      startButton.disabled = true;
       window.alert('Please choose a date in the future');
-   
+      dataDays.textContent = '00';
+        dataHours.textContent = '00';
+        dataMinutes.textContent = '00';
+        dataSeconds.textContent = '00';
     }
   },
 };
 
 const fp = flatpickr(input, options);
-
-
 
 function convertMs(ms) {
   // Number of milliseconds per unit of time
@@ -74,8 +77,39 @@ function convertMs(ms) {
   return { days, hours, minutes, seconds };
 }
 
-function onClickStart(){
- 
- }
+startButton.addEventListener('click', () => {
+  // console.log('start', deltaTime);
+  startButton.disabled = true;
+  setIntervalId = setInterval(() => {
+    if (deltaTime < 1000) {
+           return;
+    }
+
+    deltaTime -= 1000;
+    const timeComponents = convertMs(deltaTime);
+    console.log(timeComponents);
+
+    setDataInformation(timeComponents);
 
 
+    // dataDays.textContent = String(timeComponents.days).padStart(2, '0');
+    // dataHours.textContent = String(timeComponents.hours).padStart(2, '0');
+    // dataMinutes.textContent = String(timeComponents.minutes).padStart(2, '0');
+    // dataSeconds.textContent = String(timeComponents.seconds).padStart(2, '0');
+  }, 1000);
+});
+
+// function clearDataInformation() {
+  
+//   dataDays.textContent = '00';
+//   dataHours.textContent = '00';
+//   dataMinutes.textContent = '00';
+//   dataSeconds.textContent = '00';
+// }
+
+function setDataInformation(timeComponents){
+  dataDays.textContent = String(timeComponents.days).padStart(2, '0');
+    dataHours.textContent = String(timeComponents.hours).padStart(2, '0');
+    dataMinutes.textContent = String(timeComponents.minutes).padStart(2, '0');
+    dataSeconds.textContent = String(timeComponents.seconds).padStart(2, '0');
+}
