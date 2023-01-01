@@ -1,6 +1,6 @@
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
-
+import Notiflix from 'notiflix';
 
 const input = document.querySelector('#datetime-picker');
 
@@ -10,9 +10,6 @@ const dataDays = document.querySelector('span[data-days]');
 const dataHours = document.querySelector('span[data-hours]');
 const dataMinutes = document.querySelector('span[data-minutes]');
 const dataSeconds = document.querySelector('span[data-seconds]');
-
-
-
 
 let deltaTime = 0;
 let setIntervalId = 0;
@@ -34,24 +31,19 @@ const options = {
     const date2 = selectedDates[0].getTime();
 
     deltaTime = date2 - date1;
-    // console.log(date2);
-    // console.log(deltaTime);
+    console.log(date2);
+    console.log(deltaTime);
     if (deltaTime > 0) {
       startButton.disabled = false;
       const timeComponents = convertMs(deltaTime);
-      // console.log(timeComponents);
-      
-      dataDays.textContent = timeComponents.days;
-      dataHours.textContent = String(timeComponents.hours).padStart(2, '0');
-      dataMinutes.textContent = String(timeComponents.minutes).padStart(2, '0');
-      dataSeconds.textContent = String(timeComponents.seconds).padStart(2, '0');
+      setDataInformation(timeComponents);
     } else {
       startButton.disabled = true;
-      window.alert('Please choose a date in the future');
+      Notiflix.Notify.failure('Please choose a date in the future');
       dataDays.textContent = '00';
-        dataHours.textContent = '00';
-        dataMinutes.textContent = '00';
-        dataSeconds.textContent = '00';
+      dataHours.textContent = '00';
+      dataMinutes.textContent = '00';
+      dataSeconds.textContent = '00';
     }
   },
 };
@@ -82,34 +74,31 @@ startButton.addEventListener('click', () => {
   startButton.disabled = true;
   setIntervalId = setInterval(() => {
     if (deltaTime < 1000) {
-           return;
+      return;
     }
-
     deltaTime -= 1000;
     const timeComponents = convertMs(deltaTime);
-    console.log(timeComponents);
-
+    // console.log(timeComponents);
     setDataInformation(timeComponents);
-
-
-    // dataDays.textContent = String(timeComponents.days).padStart(2, '0');
-    // dataHours.textContent = String(timeComponents.hours).padStart(2, '0');
-    // dataMinutes.textContent = String(timeComponents.minutes).padStart(2, '0');
-    // dataSeconds.textContent = String(timeComponents.seconds).padStart(2, '0');
   }, 1000);
 });
 
-// function clearDataInformation() {
-  
-//   dataDays.textContent = '00';
-//   dataHours.textContent = '00';
-//   dataMinutes.textContent = '00';
-//   dataSeconds.textContent = '00';
-// }
-
-function setDataInformation(timeComponents){
-  dataDays.textContent = String(timeComponents.days).padStart(2, '0');
-    dataHours.textContent = String(timeComponents.hours).padStart(2, '0');
-    dataMinutes.textContent = String(timeComponents.minutes).padStart(2, '0');
-    dataSeconds.textContent = String(timeComponents.seconds).padStart(2, '0');
+function setDataInformation(timeComponents) {
+  if (timeComponents.days < 99) {
+    dataDays.textContent = String(timeComponents.days).padStart(2, '0');
+  } else {
+    dataDays.textContent = timeComponents.days;
+  }
+  dataHours.textContent = String(timeComponents.hours).padStart(2, '0');
+  dataMinutes.textContent = String(timeComponents.minutes).padStart(2, '0');
+  dataSeconds.textContent = String(timeComponents.seconds).padStart(2, '0');
 }
+
+Notiflix.Notify.init({
+  position: 'center-top',
+  width: '300px',
+  distance: '10px',
+  opacity: 1,
+  rtl: false,
+  timeout: 2000,
+});
